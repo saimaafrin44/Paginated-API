@@ -11,8 +11,26 @@ const users = [
     {id:7, name: 'user 7'}
 ]
 
-app.get('/users', (req, res) => {
-    //define page and limit
+const posts = [
+    {id:1, name: 'post 1'},
+    {id:2, name: 'post 2'},
+    {id:3, name: 'post 3'},
+    {id:4, name: 'post 4'},
+    {id:5, name: 'post 5'},
+    {id:6, name: 'post 6'},
+    {id:7, name: 'post 7'}
+]
+
+app.get('/posts', paginatedResults(posts), (req, res) => {
+    res.json(res.paginatedResults)
+  })
+app.get('/users', paginatedResults(users), (req, res) => {
+    res.json(res.paginatedResults)
+  })
+
+function paginatedResults(model) {
+    return (req, res, next) => {
+
     const page = parseInt(req.query.page)
     const limit = parseInt(req.query.limit)
 
@@ -22,7 +40,7 @@ app.get('/users', (req, res) => {
     const results = {} //to define if there is another page or not
     // users between the start and end index
 
-    if(endIndex < users.length) {
+    if(endIndex < model.length) {
         results.next = {
             page: page + 1,
             limit: limit
@@ -35,8 +53,10 @@ app.get('/users', (req, res) => {
             limit: limit
         }
     }
-
-    results.results = users.slice(startIndex, endIndex)
-    res.json(results)
-})
+    results.results = model.slice(startIndex, endIndex)
+    res.paginatedResults = results
+    next()
+}
+    
+}
 app.listen(3000)
